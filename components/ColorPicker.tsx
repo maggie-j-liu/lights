@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { RgbColorPicker } from "react-colorful";
+import { getDatabase, ref, set } from "firebase/database";
+import { getApp } from "@firebase/app";
+import { useDebouncyEffect } from "use-debouncy";
 
-interface Color {
+export interface Color {
   r: number;
   g: number;
   b: number;
@@ -20,8 +23,16 @@ const hexToRgb = (hex: string) => {
       }
     : null;
 };
+
+const saveColor = async (color: Color) => {
+  const app = getApp();
+  console.log(app);
+  const db = getDatabase();
+  await set(ref(db, "color"), color);
+};
 const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
   const [color, setColor] = useState(initialColor);
+  const [value, setValue] = useState(initialColor);
   const [hex, setHex] = useState(rgbToHex(initialColor));
   const [rgb, setRgb] = useState(
     `${initialColor.r}, ${initialColor.g}, ${initialColor.b}`
@@ -30,14 +41,20 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
     setHex(rgbToHex(color));
     setRgb(`${color.r}, ${color.g}, ${color.b}`);
   }, [color]);
+  useDebouncyEffect(
+    () => {
+      setColor(value);
+      saveColor(value);
+    },
+    200,
+    [value]
+  );
   return (
     <div className="w-72 shadow-xl rounded-b-lg">
       <RgbColorPicker
         className="!w-full !h-64"
-        color={color}
-        onChange={(color) => {
-          setColor(color);
-        }}
+        color={value}
+        onChange={setValue}
       />
       <div className="flex rounded-b-lg overflow-hidden px-2 py-2">
         <div className="w-1/2">
@@ -52,6 +69,7 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
                 const converted = hexToRgb(e.target.value);
                 if (converted) {
                   setColor(converted);
+                  saveColor(converted);
                 } else {
                   setHex(rgbToHex(color));
                 }
@@ -73,7 +91,9 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
                   nums.length === 3 &&
                   nums.every((num) => !isNaN(num) && num >= 0 && num <= 255)
                 ) {
-                  setColor({ r: nums[0], g: nums[1], b: nums[2] });
+                  const newColor = { r: nums[0], g: nums[1], b: nums[2] };
+                  setColor(newColor);
+                  saveColor(newColor);
                 } else {
                   setRgb(`${color.r}, ${color.g}, ${color.b}`);
                 }

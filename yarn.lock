@@ -4061,6 +4061,11 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
+use-debouncy@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/use-debouncy/-/use-debouncy-4.2.1.tgz#77b7826074b707ca4ca92739f362e4301b58f02e"
+  integrity sha512-wvKcvmftk716UkRPC7+/W3AIWj0m4TKLkKTrgBeR+4/e1//turjZLlSIu8ix2AeeFK/3E4poCqN/eMr2qNApcQ==
+
 use-subscription@1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/use-subscription/-/use-subscription-1.5.1.tgz#73501107f02fad84c6dd57965beb0b75c68c42d1"

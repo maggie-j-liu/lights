@@ -1,15 +1,10 @@
 import type { GetServerSideProps } from "next";
 import Head from "next/head";
-import ColorPicker from "../components/ColorPicker";
-import initFirebase from "../utils/firebase";
+import ColorPicker, { Color } from "../components/ColorPicker";
 import { getDatabase, get, ref } from "firebase/database";
+import initFirebase from "../utils/firebase";
 
-interface FirebaseColor {
-  red: number;
-  green: number;
-  blue: number;
-}
-const Home = ({ color }: { color: FirebaseColor }) => {
+const Home = ({ color }: { color: Color }) => {
   return (
     <div>
       <Head>
@@ -19,9 +14,7 @@ const Home = ({ color }: { color: FirebaseColor }) => {
       </Head>
       <main>
         lights
-        <ColorPicker
-          initialColor={{ r: color.red, g: color.green, b: color.blue }}
-        />
+        <ColorPicker initialColor={color} />
       </main>
     </div>
   );
