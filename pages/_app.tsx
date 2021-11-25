@@ -1,13 +1,13 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
-import { useEffect } from "react";
-import initFirebase from "../utils/firebase";
+import { FirebaseContextProvider } from "../components/FirebaseContext";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  useEffect(() => {
-    initFirebase();
-  }, []);
-  return <Component {...pageProps} />;
+  return (
+    <FirebaseContextProvider>
+      <Component {...pageProps} />
+    </FirebaseContextProvider>
+  );
 }
 
 export default MyApp;

@@ -2,7 +2,7 @@ import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import ColorPicker, { Color } from "../components/ColorPicker";
 import { getDatabase, get, ref } from "firebase/database";
-import initFirebase from "../utils/firebase";
+import { initFirebase } from "../components/FirebaseContext";
 
 const Home = ({ color }: { color: Color }) => {
   return (

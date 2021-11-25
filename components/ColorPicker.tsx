@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { RgbColorPicker } from "react-colorful";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref, set, onValue } from "firebase/database";
 import { getApp } from "@firebase/app";
 import { useDebouncyEffect } from "use-debouncy";
+import useFirebase from "./FirebaseContext";
 
 export interface Color {
   r: number;
@@ -25,8 +26,6 @@ const hexToRgb = (hex: string) => {
 };
 
 const saveColor = async (color: Color) => {
-  const app = getApp();
-  console.log(app);
   const db = getDatabase();
   await set(ref(db, "color"), color);
 };
@@ -37,6 +36,15 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
   const [rgb, setRgb] = useState(
     `${initialColor.r}, ${initialColor.g}, ${initialColor.b}`
   );
+  const firebaseApp = useFirebase();
+  useEffect(() => {
+    if (!firebaseApp) return;
+    const unsubscribe = onValue(ref(getDatabase(), "color"), (snapshot) => {
+      setColor(snapshot.val());
+      setValue(snapshot.val());
+    });
+    return () => unsubscribe();
+  }, [firebaseApp]);
   useEffect(() => {
     setHex(rgbToHex(color));
     setRgb(`${color.r}, ${color.g}, ${color.b}`);
@@ -46,7 +54,7 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
       setColor(value);
       saveColor(value);
     },
-    200,
+    500,
     [value]
   );
   return (
@@ -74,6 +82,11 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
                   setHex(rgbToHex(color));
                 }
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  (e.target as HTMLElement).blur();
+                }
+              }}
             />
           </label>
         </div>
@@ -96,6 +109,11 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
                   saveColor(newColor);
                 } else {
                   setRgb(`${color.r}, ${color.g}, ${color.b}`);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  (e.target as HTMLElement).blur();
                 }
               }}
             />
