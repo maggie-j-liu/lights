@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { RgbColorPicker } from "react-colorful";
 import { getDatabase, ref, set, onValue } from "firebase/database";
-import { getApp } from "@firebase/app";
 import { useDebouncyEffect } from "use-debouncy";
 import useFirebase from "./FirebaseContext";
-
-export interface Color {
-  r: number;
-  g: number;
-  b: number;
-}
+import useColor, { Color } from "./ColorContext";
 
 const rgbToHex = ({ r, g, b }: { r: number; g: number; b: number }) => {
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -29,19 +23,15 @@ const saveColor = async (color: Color) => {
   const db = getDatabase();
   await set(ref(db, "color"), color);
 };
-const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
-  const [color, setColor] = useState(initialColor);
-  const [value, setValue] = useState(initialColor);
-  const [hex, setHex] = useState(rgbToHex(initialColor));
-  const [rgb, setRgb] = useState(
-    `${initialColor.r}, ${initialColor.g}, ${initialColor.b}`
-  );
+const ColorPicker = () => {
+  const { color, setColor } = useColor();
+  const [hex, setHex] = useState(rgbToHex(color));
+  const [rgb, setRgb] = useState(`${color.r}, ${color.g}, ${color.b}`);
   const firebaseApp = useFirebase();
   useEffect(() => {
     if (!firebaseApp) return;
     const unsubscribe = onValue(ref(getDatabase(), "color"), (snapshot) => {
       setColor(snapshot.val());
-      setValue(snapshot.val());
     });
     return () => unsubscribe();
   }, [firebaseApp]);
@@ -51,25 +41,26 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
   }, [color]);
   useDebouncyEffect(
     () => {
-      setColor(value);
-      saveColor(value);
+      saveColor(color);
     },
     500,
-    [value]
+    [color]
   );
   return (
-    <div className="w-72 shadow-xl rounded-b-lg">
+    <div className="bg-white w-72 shadow-2xl rounded-lg">
       <RgbColorPicker
         className="!w-full !h-64"
-        color={value}
-        onChange={setValue}
+        color={color}
+        onChange={(c) => {
+          setColor(c);
+        }}
       />
-      <div className="flex rounded-b-lg overflow-hidden px-2 py-2">
+      <div className="flex rounded-b-lg overflow-hidden px-2 py-2 gap-2">
         <div className="w-1/2">
           <label className="mx-auto w-full">
-            <p className="text-center">hex</p>
+            <p className="text-center text-gray-600 text-sm font-light">hex</p>
             <input
-              className="w-full text-center"
+              className="w-full text-center border-2 rounded-md border-gray-300"
               type="text"
               value={hex}
               onChange={(e) => setHex(e.target.value)}
@@ -92,9 +83,9 @@ const ColorPicker = ({ initialColor }: { initialColor: Color }) => {
         </div>
         <div className="w-1/2">
           <label>
-            <p className="text-center">rgb</p>
+            <p className="text-center text-gray-600 text-sm font-light">rgb</p>
             <input
-              className="w-full text-center"
+              className="w-full text-center border-2 rounded-md border-gray-300"
               type="text"
               value={rgb}
               onChange={(e) => setRgb(e.target.value)}
