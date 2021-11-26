@@ -1,16 +1,25 @@
 import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import ColorPicker from "../components/ColorPicker";
-import { getDatabase, get, ref } from "firebase/database";
-import { initFirebase } from "../components/FirebaseContext";
+import { getDatabase, get, ref, onValue } from "firebase/database";
+import useFirebase, { initFirebase } from "../components/FirebaseContext";
 import useColor, { Color } from "../components/ColorContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-const Home = ({ color: initialColor }: { color: Color }) => {
+const Home = ({ color: initialColor, on }: { color: Color; on: boolean }) => {
   const { color, setColor } = useColor();
+  const [status, setStatus] = useState(on);
+  const firebaseApp = useFirebase();
   useEffect(() => {
     document.body.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
   }, [color]);
+  useEffect(() => {
+    if (!firebaseApp) return;
+    const unsubscribe = onValue(ref(getDatabase(), "on"), (snapshot) => {
+      setStatus(snapshot.val());
+    });
+    return () => unsubscribe();
+  }, [firebaseApp]);
   useEffect(() => {
     setColor(initialColor);
   }, []);
@@ -42,6 +51,21 @@ const Home = ({ color: initialColor }: { color: Color }) => {
               </a>{" "}
               room! Use the slider to control them. Have fun :)
             </p>
+            <div className="h-8" />
+            <p className="flex items-center gap-2">
+              <span className="font-medium">Status:</span>{" "}
+              <div
+                className={`inline-block w-4 h-4 rounded-full ${
+                  status ? "bg-green-500" : "bg-red-500"
+                }`}
+              />{" "}
+              {status ? "on" : "off"}
+            </p>
+            <p className="text-sm">
+              {status
+                ? "My lights are on right now! Choose a color here and they'll change!"
+                : "My lights are off right now, but they'll be the color selected here when I turn them back on."}
+            </p>
           </div>
         </div>
       </main>
@@ -55,9 +79,11 @@ export const getServerSideProps: GetServerSideProps = async () => {
   initFirebase();
   const db = getDatabase();
   const color = await get(ref(db, "color")).then((snapshot) => snapshot.val());
+  const on = await get(ref(db, "on")).then((snapshot) => snapshot.val());
   return {
     props: {
       color,
+      on,
     },
   };
 };
