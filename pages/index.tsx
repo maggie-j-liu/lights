@@ -61,7 +61,7 @@ const Home = ({ color: initialColor, on }: { color: Color; on: boolean }) => {
               />{" "}
               {status ? "on" : "off"}
             </p>
-            <p className="text-sm">
+            <p className="text-left text-sm">
               {status
                 ? "My lights are on right now! Choose a color here and they'll change!"
                 : "My lights are off right now, but they'll be the color selected here when I turn them back on."}
