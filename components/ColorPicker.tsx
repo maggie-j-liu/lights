@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { RgbColorPicker } from "react-colorful";
 import { getDatabase, ref, set, onValue } from "firebase/database";
 import { useDebouncyEffect } from "use-debouncy";
 import useFirebase from "./FirebaseContext";
-import useColor, { Color } from "./ColorContext";
+import useColor, { AllColors, Color } from "./ColorContext";
 
 const rgbToHex = ({ r, g, b }: { r: number; g: number; b: number }) => {
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -19,14 +19,13 @@ const hexToRgb = (hex: string) => {
     : null;
 };
 
-const saveColor = async (color: Color) => {
+const saveColor = async (color: AllColors) => {
   const db = getDatabase();
   await set(ref(db, "color"), color);
 };
+
 const ColorPicker = () => {
   const { color, setColor } = useColor();
-  const [hex, setHex] = useState(rgbToHex(color));
-  const [rgb, setRgb] = useState(`${color.r}, ${color.g}, ${color.b}`);
   const firebaseApp = useFirebase();
   useEffect(() => {
     if (!firebaseApp) return;
@@ -35,81 +34,118 @@ const ColorPicker = () => {
     });
     return () => unsubscribe();
   }, [firebaseApp]);
-  useEffect(() => {
-    setHex(rgbToHex(color));
-    setRgb(`${color.r}, ${color.g}, ${color.b}`);
-  }, [color]);
   useDebouncyEffect(
     () => {
       saveColor(color);
     },
     500,
-    [color]
+    [color.r, color.g, color.b]
   );
   return (
-    <div className="bg-white w-72 shadow-2xl rounded-lg">
-      <RgbColorPicker
-        className="!w-full !h-64"
-        color={color}
-        onChange={(c) => {
-          setColor(c);
-        }}
-      />
-      <div className="flex rounded-b-lg overflow-hidden px-2 py-2 gap-2">
-        <div className="w-1/2">
-          <label className="mx-auto w-full">
-            <p className="text-center text-gray-600 text-sm font-light">hex</p>
-            <input
-              className="w-full text-center border-2 rounded-md border-gray-300"
-              type="text"
-              value={hex}
-              onChange={(e) => setHex(e.target.value)}
-              onBlur={(e) => {
-                const converted = hexToRgb(e.target.value);
-                if (converted) {
-                  setColor(converted);
-                  saveColor(converted);
-                } else {
-                  setHex(rgbToHex(color));
+    <div className="flex flex-col items-center gap-4">
+      <div className="bg-white w-72 shadow-2xl rounded-lg">
+        <RgbColorPicker
+          className="!w-full !h-64"
+          color={color}
+          onChange={(c) => {
+            setColor({ ...c, rainbow: false });
+          }}
+        />
+        <div className="flex rounded-b-lg overflow-hidden px-2 py-2 gap-2">
+          <div className="w-1/2">
+            <label className="mx-auto w-full">
+              <p className="text-center text-gray-600 text-sm font-light">
+                hex
+              </p>
+              <input
+                className="w-full text-center border-2 rounded-md border-gray-300"
+                type="text"
+                value={rgbToHex({ r: color.r, g: color.g, b: color.b })}
+                onChange={(e) =>
+                  setColor({
+                    ...(hexToRgb(e.target.value) as Color),
+                    rainbow: false,
+                  })
                 }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  (e.target as HTMLElement).blur();
+                onBlur={(e) => {
+                  const converted = hexToRgb(e.target.value);
+                  if (converted) {
+                    setColor({ ...converted, rainbow: false });
+                    saveColor({ ...converted, rainbow: false });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    (e.target as HTMLElement).blur();
+                  }
+                }}
+              />
+            </label>
+          </div>
+          <div className="w-1/2">
+            <label>
+              <p className="text-center text-gray-600 text-sm font-light">
+                rgb
+              </p>
+              <input
+                className="w-full text-center border-2 rounded-md border-gray-300"
+                type="text"
+                value={`${color.r}, ${color.g}, ${color.b}`}
+                onChange={(e) =>
+                  setColor({
+                    r: parseInt(e.target.value.split(",")[0]),
+                    g: parseInt(e.target.value.split(",")[1]),
+                    b: parseInt(e.target.value.split(",")[2]),
+                    rainbow: false,
+                  })
                 }
-              }}
-            />
-          </label>
+                onBlur={(e) => {
+                  const nums = e.target.value
+                    .split(", ")
+                    .map((n) => parseInt(n));
+                  if (
+                    nums.length === 3 &&
+                    nums.every((num) => !isNaN(num) && num >= 0 && num <= 255)
+                  ) {
+                    const newColor = { r: nums[0], g: nums[1], b: nums[2] };
+                    setColor({ ...newColor, rainbow: false });
+                    saveColor({ ...newColor, rainbow: false });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    (e.target as HTMLElement).blur();
+                  }
+                }}
+              />
+            </label>
+          </div>
         </div>
-        <div className="w-1/2">
-          <label>
-            <p className="text-center text-gray-600 text-sm font-light">rgb</p>
-            <input
-              className="w-full text-center border-2 rounded-md border-gray-300"
-              type="text"
-              value={rgb}
-              onChange={(e) => setRgb(e.target.value)}
-              onBlur={(e) => {
-                const nums = e.target.value.split(", ").map((n) => parseInt(n));
-                if (
-                  nums.length === 3 &&
-                  nums.every((num) => !isNaN(num) && num >= 0 && num <= 255)
-                ) {
-                  const newColor = { r: nums[0], g: nums[1], b: nums[2] };
-                  setColor(newColor);
-                  saveColor(newColor);
-                } else {
-                  setRgb(`${color.r}, ${color.g}, ${color.b}`);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  (e.target as HTMLElement).blur();
-                }
-              }}
-            />
-          </label>
-        </div>
+      </div>
+      <div>
+        <button
+          onClick={() => {
+            saveColor({ ...color, rainbow: !color.rainbow });
+            setColor({ ...color, rainbow: !color.rainbow });
+          }}
+          className="flex items-center gap-2 text-white bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500 border-white border-2 rounded-xl px-4 py-1.5"
+        >
+          Rainbow{" "}
+          {color.rainbow && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )}
+        </button>
       </div>
     </div>
   );

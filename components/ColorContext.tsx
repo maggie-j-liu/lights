@@ -12,15 +12,19 @@ export interface Color {
   g: number;
   b: number;
 }
+export interface AllColors extends Color {
+  rainbow: boolean;
+}
+
 const ColorContext = createContext<{
-  color: Color;
-  setColor: Dispatch<SetStateAction<Color>> | Function;
+  color: AllColors;
+  setColor: Dispatch<SetStateAction<AllColors>> | Function;
 }>({
-  color: { r: 0, g: 0, b: 0 },
+  color: { r: 0, g: 0, b: 0, rainbow: false },
   setColor: () => {},
 });
 export const ColorContextProvider = ({ children }: { children: ReactNode }) => {
-  const [color, setColor] = useState({ r: 0, g: 0, b: 0 });
+  const [color, setColor] = useState({ r: 0, g: 0, b: 0, rainbow: false });
   return (
     <ColorContext.Provider value={{ color, setColor }}>
       {children}

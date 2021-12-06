@@ -3,10 +3,16 @@ import Head from "next/head";
 import ColorPicker from "../components/ColorPicker";
 import { getDatabase, get, ref, onValue } from "firebase/database";
 import useFirebase, { initFirebase } from "../components/FirebaseContext";
-import useColor, { Color } from "../components/ColorContext";
+import useColor, { AllColors, Color } from "../components/ColorContext";
 import { useEffect, useState } from "react";
 
-const Home = ({ color: initialColor, on }: { color: Color; on: boolean }) => {
+const Home = ({
+  color: initialColor,
+  on,
+}: {
+  color: AllColors;
+  on: boolean;
+}) => {
   const { color, setColor } = useColor();
   const [status, setStatus] = useState(on);
   const firebaseApp = useFirebase();
@@ -54,7 +60,7 @@ const Home = ({ color: initialColor, on }: { color: Color; on: boolean }) => {
             <div className="h-8" />
             <p className="flex items-center gap-2">
               <span className="font-medium">Status:</span>{" "}
-              <div
+              <span
                 className={`inline-block w-4 h-4 rounded-full ${
                   status ? "bg-green-500" : "bg-red-500"
                 }`}
