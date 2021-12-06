@@ -3,7 +3,7 @@ import Head from "next/head";
 import ColorPicker from "../components/ColorPicker";
 import { getDatabase, get, ref, onValue } from "firebase/database";
 import useFirebase, { initFirebase } from "../components/FirebaseContext";
-import useColor, { AllColors, Color } from "../components/ColorContext";
+import useColor, { AllColors } from "../components/ColorContext";
 import { useEffect, useState } from "react";
 
 const Home = ({
@@ -33,7 +33,7 @@ const Home = ({
   return (
     <div className="min-h-screen">
       <Head>
-        <title>Maggie's Lights 🚥</title>
+        <title>Maggie's Lights 🎄</title>
         <meta name="description" content="Maggie's Lights 🚥" />
         <link rel="icon" href="/favicon.png" />
       </Head>
@@ -44,9 +44,9 @@ const Home = ({
             className="max-w-sm lg:max-w-md order-first md:order-2 text-center md:text-left"
             style={{ color: perceivedColor > 127.5 ? "black" : "white" }}
           >
-            <h1 className="text-5xl mb-2 font-light">lights 🚥</h1>
+            <h1 className="text-5xl mb-2 font-light">lights 🎄</h1>
             <p className="text-2xl">
-              These are the lights in{" "}
+              These are the lights from{" "}
               <a
                 className="underline font-semibold"
                 href="https://maggieliu.dev"
@@ -55,7 +55,17 @@ const Home = ({
               >
                 my
               </a>{" "}
-              room! Use the slider to control them. Have fun :)
+              room, now on{" "}
+              <a
+                className="underline font-semibold"
+                href="https://lelandcs.vercel.app"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Computer Science Club's
+              </a>{" "}
+              tree in the school quad! Use the slider or the button to control
+              them. Have fun :)
             </p>
             <div className="h-8" />
             <p className="flex items-center gap-2">
@@ -69,8 +79,8 @@ const Home = ({
             </p>
             <p className="text-left text-sm">
               {status
-                ? "My lights are on right now! Choose a color here and they'll change!"
-                : "My lights are off right now, but they'll be the color selected here when I turn them back on."}
+                ? "The lights are on right now! Choose a color here and they'll change!"
+                : "The lights are off right now, but they'll be the color selected here when I turn them back on."}
             </p>
           </div>
         </div>
