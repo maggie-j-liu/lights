@@ -17,7 +17,22 @@ const Home = ({
   const [status, setStatus] = useState(on);
   const firebaseApp = useFirebase();
   useEffect(() => {
-    document.body.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+    if (!color.rainbow) {
+      document.body.classList.remove(
+        "bg-gradient-to-tr",
+        "from-pink-500",
+        "via-yellow-500",
+        "to-green-300"
+      );
+      document.body.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+    } else {
+      document.body.classList.add(
+        "bg-gradient-to-tr",
+        "from-pink-500",
+        "via-yellow-500",
+        "to-green-300"
+      );
+    }
   }, [color]);
   useEffect(() => {
     if (!firebaseApp) return;
