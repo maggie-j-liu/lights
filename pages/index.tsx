@@ -38,7 +38,7 @@ const Home = ({
         <link rel="icon" href="/favicon.png" />
       </Head>
       <main>
-        <div className="py-16 px-8 flex-col md:flex-row flex justify-center gap-8 items-center h-screen">
+        <div className="py-16 px-8 flex-col md:flex-row flex justify-center gap-8 items-center min-h-screen">
           <ColorPicker />
           <div
             className="max-w-sm lg:max-w-md order-first md:order-2 text-center md:text-left"

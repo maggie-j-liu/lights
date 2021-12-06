@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RgbColorPicker } from "react-colorful";
 import { getDatabase, ref, set, onValue } from "firebase/database";
 import { useDebouncyEffect } from "use-debouncy";
@@ -26,6 +26,8 @@ const saveColor = async (color: AllColors) => {
 
 const ColorPicker = () => {
   const { color, setColor } = useColor();
+  const [hex, setHex] = useState(rgbToHex(color));
+  const [rgb, setRgb] = useState(`${color.r}, ${color.g}, ${color.b}`);
   const firebaseApp = useFirebase();
   useEffect(() => {
     if (!firebaseApp) return;
@@ -34,6 +36,10 @@ const ColorPicker = () => {
     });
     return () => unsubscribe();
   }, [firebaseApp]);
+  useEffect(() => {
+    setHex(rgbToHex(color));
+    setRgb(`${color.r}, ${color.g}, ${color.b}`);
+  }, [color.r, color.g, color.b]);
   useDebouncyEffect(
     () => {
       saveColor(color);
@@ -41,20 +47,17 @@ const ColorPicker = () => {
     500,
     [color.r, color.g, color.b]
   );
+  console.log("color", color);
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="bg-white w-72 shadow-2xl rounded-lg">
         <RgbColorPicker
+          placeholder={`${color.r}, ${color.g}, ${color.b}`}
           className="!w-full !h-64"
-          color={color}
+          color={{ r: color.r, g: color.g, b: color.b }}
           onChange={(c) => {
-            if (
-              Math.abs(c.r - color.r) > 3 &&
-              Math.abs(c.g - color.g) > 3 &&
-              Math.abs(c.b - color.b) > 3
-            ) {
-              setColor({ ...c, rainbow: false });
-            }
+            console.log(c);
+            setColor({ ...c, rainbow: false });
           }}
         />
         <div className="flex rounded-b-lg overflow-hidden px-2 py-2 gap-2">
@@ -66,18 +69,15 @@ const ColorPicker = () => {
               <input
                 className="w-full text-center border-2 rounded-md border-gray-300"
                 type="text"
-                value={rgbToHex({ r: color.r, g: color.g, b: color.b })}
-                onChange={(e) => {
-                  setColor({
-                    ...(hexToRgb(e.target.value) as Color),
-                    rainbow: false,
-                  });
-                }}
+                value={hex}
+                onChange={(e) => setHex(e.target.value)}
                 onBlur={(e) => {
                   const converted = hexToRgb(e.target.value);
                   if (converted) {
                     setColor({ ...converted, rainbow: false });
                     saveColor({ ...converted, rainbow: false });
+                  } else {
+                    setHex(rgbToHex(color));
                   }
                 }}
                 onKeyDown={(e) => {
@@ -96,15 +96,8 @@ const ColorPicker = () => {
               <input
                 className="w-full text-center border-2 rounded-md border-gray-300"
                 type="text"
-                value={`${color.r}, ${color.g}, ${color.b}`}
-                onChange={(e) => {
-                  setColor({
-                    r: parseInt(e.target.value.split(",")[0]),
-                    g: parseInt(e.target.value.split(",")[1]),
-                    b: parseInt(e.target.value.split(",")[2]),
-                    rainbow: false,
-                  });
-                }}
+                value={rgb}
+                onChange={(e) => setRgb(e.target.value)}
                 onBlur={(e) => {
                   const nums = e.target.value
                     .split(", ")
@@ -116,6 +109,8 @@ const ColorPicker = () => {
                     const newColor = { r: nums[0], g: nums[1], b: nums[2] };
                     setColor({ ...newColor, rainbow: false });
                     saveColor({ ...newColor, rainbow: false });
+                  } else {
+                    setRgb(`${color.r}, ${color.g}, ${color.b}`);
                   }
                 }}
                 onKeyDown={(e) => {
