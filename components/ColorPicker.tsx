@@ -48,7 +48,13 @@ const ColorPicker = () => {
           className="!w-full !h-64"
           color={color}
           onChange={(c) => {
-            setColor({ ...c, rainbow: false });
+            if (
+              Math.abs(c.r - color.r) > 3 ||
+              Math.abs(c.g - color.g) > 3 ||
+              Math.abs(c.b - color.b) > 3
+            ) {
+              setColor({ ...c, rainbow: false });
+            }
           }}
         />
         <div className="flex rounded-b-lg overflow-hidden px-2 py-2 gap-2">
@@ -61,12 +67,12 @@ const ColorPicker = () => {
                 className="w-full text-center border-2 rounded-md border-gray-300"
                 type="text"
                 value={rgbToHex({ r: color.r, g: color.g, b: color.b })}
-                onChange={(e) =>
+                onChange={(e) => {
                   setColor({
                     ...(hexToRgb(e.target.value) as Color),
                     rainbow: false,
-                  })
-                }
+                  });
+                }}
                 onBlur={(e) => {
                   const converted = hexToRgb(e.target.value);
                   if (converted) {
@@ -91,14 +97,14 @@ const ColorPicker = () => {
                 className="w-full text-center border-2 rounded-md border-gray-300"
                 type="text"
                 value={`${color.r}, ${color.g}, ${color.b}`}
-                onChange={(e) =>
+                onChange={(e) => {
                   setColor({
                     r: parseInt(e.target.value.split(",")[0]),
                     g: parseInt(e.target.value.split(",")[1]),
                     b: parseInt(e.target.value.split(",")[2]),
                     rainbow: false,
-                  })
-                }
+                  });
+                }}
                 onBlur={(e) => {
                   const nums = e.target.value
                     .split(", ")
