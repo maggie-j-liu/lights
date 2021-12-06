@@ -49,7 +49,7 @@ const Home = ({
     <div className="min-h-screen">
       <Head>
         <title>Maggie's Lights 🎄</title>
-        <meta name="description" content="Maggie's Lights 🚥" />
+        <meta name="description" content="Maggie's Lights 🎄" />
         <link rel="icon" href="/favicon.png" />
       </Head>
       <main>
