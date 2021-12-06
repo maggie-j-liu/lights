@@ -49,8 +49,8 @@ const ColorPicker = () => {
           color={color}
           onChange={(c) => {
             if (
-              Math.abs(c.r - color.r) > 3 ||
-              Math.abs(c.g - color.g) > 3 ||
+              Math.abs(c.r - color.r) > 3 &&
+              Math.abs(c.g - color.g) > 3 &&
               Math.abs(c.b - color.b) > 3
             ) {
               setColor({ ...c, rainbow: false });

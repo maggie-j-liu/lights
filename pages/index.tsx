@@ -31,14 +31,14 @@ const Home = ({
   }, []);
   const perceivedColor = (color.r * 299 + color.g * 587 + color.b * 114) / 1000;
   return (
-    <div className="min-h-screen px-8">
+    <div className="min-h-screen">
       <Head>
         <title>Maggie's Lights 🚥</title>
         <meta name="description" content="Maggie's Lights 🚥" />
         <link rel="icon" href="/favicon.png" />
       </Head>
       <main>
-        <div className="flex-col md:flex-row flex justify-center gap-8 items-center h-screen">
+        <div className="py-16 px-8 flex-col md:flex-row flex justify-center gap-8 items-center h-screen">
           <ColorPicker />
           <div
             className="max-w-sm lg:max-w-md order-first md:order-2 text-center md:text-left"
